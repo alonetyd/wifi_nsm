@@ -1,0 +1,8 @@
+{
+    "name": "esp32_coprocessor_bt",
+    "version": "1.0.0",
+    "description": "ESP32 Coprocessor - BT Controller Only Firmware",
+    "dependencies": {
+        "espressif/esp-hosted": "*"
+    }
+}

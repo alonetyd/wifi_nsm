@@ -1,0 +1,17 @@
+# 统一文本换行，二进制文件不做转换
+* text=auto
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ttf binary
+*.otf binary
+*.pdf binary
+*.bin binary
+*.zip binary
+
+# 语言统计时把生成代码与第三方代码排除，避免仓库"看起来"全是 C 数组
+main/esp_2.41ttf.c linguist-generated=true
+main/gbk_to_unicode.c linguist-generated=true
+main/lvgl-master/** linguist-vendored

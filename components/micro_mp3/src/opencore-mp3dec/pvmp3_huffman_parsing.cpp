@@ -1,0 +1,310 @@
+/* ------------------------------------------------------------------
+ * Copyright (C) 1998-2009 PacketVideo
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied.
+ * See the License for the specific language governing permissions
+ * and limitations under the License.
+ * -------------------------------------------------------------------
+ */
+
+/*
+------------------------------------------------------------------------------
+
+   PacketVideo Corp.
+   MP3 Decoder Library
+
+   Filename: pvmp3_huffman_decoding.cpp
+
+ Funtions:
+    pvmp3_huffman_quad_decoding
+    pvmp3_huffman_pair_decoding
+    pvmp3_huffman_pair_decoding_linbits
+
+     Date: 09/21/2007
+
+------------------------------------------------------------------------------
+ REVISION HISTORY
+
+
+ Description:
+
+------------------------------------------------------------------------------
+ INPUT AND OUTPUT DEFINITIONS
+
+ Inputs:
+    int32 is[],
+    granuleInfo  *grInfo,    information for the given channel and granule
+    tmp3dec_file   *pVars,   decoder state structure
+    int32 part2_start,       index to beginning of part 2 data
+    mp3Header *info          mp3 header info
+
+ Outputs:
+    int32 is[],              uncompressed data
+
+  Return:
+     non zero frequency lines
+
+------------------------------------------------------------------------------
+ FUNCTION DESCRIPTION
+
+   These functions are used to decode huffman codewords from the input
+   bitstream using combined binary search and look-up table approach.
+
+------------------------------------------------------------------------------
+ REQUIREMENTS
+
+
+------------------------------------------------------------------------------
+ REFERENCES
+ [1] ISO MPEG Audio Subgroup Software Simulation Group (1996)
+     ISO 13818-3 MPEG-2 Audio Decoder - Lower Sampling Frequency Extension
+
+
+------------------------------------------------------------------------------
+ PSEUDO-CODE
+
+------------------------------------------------------------------------------
+*/
+
+
+/*----------------------------------------------------------------------------
+; INCLUDES
+----------------------------------------------------------------------------*/
+#include "pv_mp3_huffman.h"
+#include "s_mp3bits.h"
+#include "mp3_mem_funcs.h"
+#include "pvmp3_tables.h"
+
+
+/*----------------------------------------------------------------------------
+; MACROS
+; Define module specific macros here
+----------------------------------------------------------------------------*/
+
+
+/*----------------------------------------------------------------------------
+; DEFINES
+; Include all pre-processor statements here. Include conditional
+; compile variables also.
+----------------------------------------------------------------------------*/
+
+
+/*----------------------------------------------------------------------------
+; LOCAL FUNCTION DEFINITIONS
+; Function Prototype declaration
+----------------------------------------------------------------------------*/
+
+/*----------------------------------------------------------------------------
+; LOCAL STORE/BUFFER/POINTER DEFINITIONS
+; Variable declaration - defined here and used outside this module
+----------------------------------------------------------------------------*/
+
+/*----------------------------------------------------------------------------
+; EXTERNAL FUNCTION REFERENCES
+; Declare functions defined elsewhere and referenced in this module
+----------------------------------------------------------------------------*/
+
+/*----------------------------------------------------------------------------
+; EXTERNAL GLOBAL STORE/BUFFER/POINTER REFERENCES
+; Declare variables used in this module but defined elsewhere
+----------------------------------------------------------------------------*/
+
+/*----------------------------------------------------------------------------
+; FUNCTION CODE
+----------------------------------------------------------------------------*/
+
+/*
+ * Decode the big-values pairs in [start, end) with table h. The pair vs.
+ * linbits choice depends only on h->linbits, so branch once per region rather
+ * than through a per-pair function pointer; the inline decoders fold into the
+ * loops.
+ */
+static void huffman_decode_pairs(struct huffcodetab *h, int32 *is,
+                                 int32 start, int32 end, tmp3Bits *pMainData)
+{
+    if (h->linbits)
+    {
+        for (int32 i = start; i < end; i += 2)
+        {
+            pvmp3_huffman_pair_decoding_linbits(h, &is[i], pMainData);
+        }
+    }
+    else
+    {
+        for (int32 i = start; i < end; i += 2)
+        {
+            pvmp3_huffman_pair_decoding(h, &is[i], pMainData);
+        }
+    }
+}
+
+int32 pvmp3_huffman_parsing(int32 is[SUBBANDS_NUMBER*FILTERBANK_BANDS],
+                            granuleInfo *grInfo,
+                            tmp3dec_file   *pVars,
+                            int32 part2_start,
+                            mp3Header *info)
+
+
+{
+    int32 i;
+    int32 region1Start;
+    int32 region2Start;
+    int32 sfreq;
+    uint32 grBits;
+    struct huffcodetab *h;
+
+    tmp3Bits *pMainData = &pVars->mainDataStream;
+
+
+    /*int32 bt = (*si).ch[ch].gr[gr].window_switching_flag && ((*si).ch[ch].gr[gr].block_type == 2);*/
+
+    sfreq = info->sampling_frequency + info->version_x + (info->version_x << 1);
+
+    /* Find region boundary for short block case. */
+
+
+    if ((grInfo->window_switching_flag) && (grInfo->block_type == 2))
+    {
+        if (info->version_x == MPEG_1)
+        {
+            /* Region2. */
+            region1Start = 12;
+        }
+        else
+        {
+            /* Region2. */
+            i = grInfo->region0_count + 1;
+            region1Start = mp3_sfBandIndex[sfreq].s[i/3];
+        }
+
+        region1Start += region1Start << 1;
+        region2Start = 576; /* No Region2 for short block case. */
+    }
+    else
+    {          /* Find region boundary for long block case. */
+        /*
+         * microMP3 FIX: clamp the scale factor band indices to the 23-entry
+         * table. region0_count is 4 bits (0..15) and region1_count is 3 bits
+         * (0..7) in the side-info bitstream, so i and i+region1_count+1 can
+         * reach 16 and 24 respectively -- both out of bounds for
+         * mp3_sfBandIndex[sfreq].l[23]. A spec-compliant stream never exceeds
+         * 22, but an adversarial stream does, producing an out-of-bounds
+         * read. Found by UBSan fuzzing.
+         */
+        i = grInfo->region0_count + 1;
+        if (i > 22)
+        {
+            i = 22;
+        }
+        int32 r2i = (int32)i + (int32)grInfo->region1_count + 1;
+        if (r2i > 22)
+        {
+            r2i = 22;
+        }
+        region1Start = mp3_sfBandIndex[sfreq].l[i];
+        region2Start = mp3_sfBandIndex[sfreq].l[r2i];
+    }
+
+    /* Read bigvalues area. */
+
+
+    if (grInfo->big_values > (FILTERBANK_BANDS*SUBBANDS_NUMBER >> 1))
+    {
+        grInfo->big_values = (FILTERBANK_BANDS * SUBBANDS_NUMBER >> 1);
+    }
+
+    int32 bigValuesEnd = (int32)(grInfo->big_values << 1);
+
+    if ((uint32)bigValuesEnd > (uint32)region2Start)
+    {
+        h = &(pVars->ht[grInfo->table_select[0]]);
+        huffman_decode_pairs(h, is, 0, region1Start, pMainData);
+
+        h = &(pVars->ht[grInfo->table_select[1]]);
+        huffman_decode_pairs(h, is, region1Start, region2Start, pMainData);
+
+        h = &(pVars->ht[grInfo->table_select[2]]);
+        huffman_decode_pairs(h, is, region2Start, bigValuesEnd, pMainData);
+    }
+    else if ((uint32)bigValuesEnd > (uint32)region1Start)
+    {
+        h = &(pVars->ht[grInfo->table_select[0]]);
+        huffman_decode_pairs(h, is, 0, region1Start, pMainData);
+
+        h = &(pVars->ht[grInfo->table_select[1]]);
+        huffman_decode_pairs(h, is, region1Start, bigValuesEnd, pMainData);
+    }
+    else
+    {
+        h = &(pVars->ht[grInfo->table_select[0]]);
+        huffman_decode_pairs(h, is, 0, bigValuesEnd, pMainData);
+    }
+
+    /* count1 decoding resumes where the big-values pairs stopped. */
+    i = bigValuesEnd;
+
+
+
+    /* Read count1 area. */
+    h = &(pVars->ht[grInfo->count1table_select+32]);
+
+    grBits     = part2_start + grInfo->part2_3_length;
+
+    while ((pMainData->usedBits < grBits) &&
+            (i < FILTERBANK_BANDS*SUBBANDS_NUMBER - 4))
+    {
+        pvmp3_huffman_quad_decoding(h, &is[i], pMainData);
+        i += 4;
+    }
+
+    /*
+     * microMP3 FIX: a count1 quad writes four lines (is[i..i+3]), so the
+     * second-chance decode must only run when a full quad fits in the
+     * 576-entry is[] buffer. The original guard (i < 576) allowed i == 574,
+     * writing is[576]/is[577] one int32 past work_buf_int32[] into the
+     * adjacent circ_buffer. i == 574 is reachable when big_values leaves i at
+     * an even non-multiple-of-4 offset while a malformed stream still has
+     * count1 bits. The tightened guard (i <= 576 - 4) requires a full quad to
+     * fit, so the largest decode is is[572..575]. The original post-decode
+     * "(i-2) >= 576" cleanup that backed out a partial overflow is now
+     * unreachable (i tops out at 576 after the increment), so it is removed.
+     */
+    if ((pMainData->usedBits < grBits) &&
+            (i <= FILTERBANK_BANDS*SUBBANDS_NUMBER - 4))
+    {
+        pvmp3_huffman_quad_decoding(h, &is[i], pMainData);
+        i += 4;
+    }
+
+    if (pMainData->usedBits > grBits)
+    {
+        i -= 4;
+
+        if (i < 0 || i > FILTERBANK_BANDS*SUBBANDS_NUMBER - 4)
+        {
+            /* illegal parameters may cause invalid access, set i to 0 */
+            i = 0;
+        }
+
+        is[i] = 0;
+        is[(i+1)] = 0;
+        is[(i+2)] = 0;
+        is[(i+3)] = 0;
+
+    }
+
+    pMainData->usedBits = grBits;
+
+    return (i);
+
+}
+

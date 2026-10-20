@@ -1,0 +1,35 @@
+P4-IDF_CO6300-MIPI_ESP-LVGL-PORT_V9
+Copyright 2026 The P4-IDF_CO6300-MIPI_ESP-LVGL-PORT_V9 Authors
+
+This product includes software and assets developed by third parties.
+The following notices are provided for attribution purposes.
+
+--------------------------------------------------------------------------------
+LVGL (https://github.com/lvgl/lvgl)
+License: MIT
+Copyright (c) 2021 LVGL Kft
+
+--------------------------------------------------------------------------------
+lodepng (https://github.com/lvandeve/lodepng)
+License: zlib
+Copyright (c) 2005-2018 Lode Vandevenne
+
+--------------------------------------------------------------------------------
+micro_mp3 / OpenCore MP3 decoder
+License: Apache License 2.0
+
+--------------------------------------------------------------------------------
+Espressif ESP-IDF, ESP-Hosted, esp_lvgl_port, esp_lvgl_adapter,
+esp_lcd_co6300, esp_lcd_touch_cst3530
+License: Apache License 2.0
+Copyright 2015-2025 Espressif Systems (Shanghai) CO LTD
+
+--------------------------------------------------------------------------------
+Kenney game assets (New Platformer Pack, Game Icons, Tiny Farm)
+License: CC0 1.0 Universal (Public Domain)
+Source: https://kenney.nl / https://opengameart.org
+
+--------------------------------------------------------------------------------
+Chinese bitmap font embedded in main/esp_2.41ttf.c
+Generated from a TTF source font; the license of the source font must be
+verified by the distributor before public redistribution.

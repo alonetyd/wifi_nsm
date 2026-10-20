@@ -1,0 +1,624 @@
+//#======================================================
+//Customer : BOE3.19-1:6MUX
+//Resolution : 262RGB*928
+//Driver IC : ICNA3312
+//PMIC : ZP3112
+//Interface??MIPI
+//Version : V0.1 - 20241118
+//Version : V0.2 - 20241128
+//Version : V0.3 - 20241217
+//Version : V0.4 - 20250403
+//====================================================== 
+//Initial code start		
+// ===  CMD2 password  ===		
+RFE 20		
+RF4 5A		
+RF5 59		
+		
+// ===  ID code  ===		
+RFE 40		
+RD8 33		
+RD9 12		
+RDA 00		
+		
+//======================== QSPI setting ============================
+//RFE 20
+//R19 10//QSPI setting, MIPI remove
+//R1C A0//QSPI setting, MIPI remove	
+// ===  Timing Gen  ===		
+RFE 20		
+R1A 00		
+		
+RFE 40		
+R01 2B		
+R02 A0		
+R59 01		
+R5A AB		
+R5B 04		
+R5C 04		
+R70 01		
+R71 AB		
+R72 04		
+R73 04		
+			
+// ===  AOD setting===	
+RFE 1C	
+R00 02	
+R1F 10	
+R20 03	
+	
+RFE 19	
+R46 DE	
+R47 F0	
+R48 03
+R78 02	
+			
+// ===  Power Settings  ===		
+RFE E0
+R00 0A
+R01 01
+R66 19
+R02 20
+R52 01
+R04 2A
+R06 0A
+R08 00
+R5E 14
+R09 0A
+R0A 01
+R67 19
+R0B 20
+R53 01
+R0C 0A
+R0E 0A
+R0F 00
+R5F 14
+R10 0A
+R11 18
+R54 01
+R24 00
+R21 C2
+R2D C2
+R32 C2
+R23 1E
+R30 03		
+R50 13
+		
+RFE 40		
+R57 43		
+R58 33		
+R6E 43		
+R6F 33		
+R74 43		
+R75 33		
+		
+// ===  swire setting ===		
+RFE 40		
+R12 FE		
+R13 04		
+RC9 16		
+R96 69		
+R97 02		
+RA5 FF		
+RAA 69		
+RAB 16		
+R98 00		
+RA7 69		
+RA9 16				
+
+RFE 80   //PMIC Setting
+RCD 0F
+RCE 05
+RCF 05
+RD0 05
+R66 22 
+R67 44
+R68 0A
+RFE 20
+R71 07
+R72 00
+R73 00	
+						   
+// === GOA mapping ===		
+RFE 70		
+R9B 1E		
+R9C 1E		
+R9D 08		
+R9E 1E		
+R9F 03		
+RA0 1E		
+RA2 02		
+RA3 1E		
+RA4 13		
+RA5 1E		
+RA6 12		
+RA7 1E		
+RA9 11		
+RAA 1E		
+RAB 1E		
+RAC 1E		
+RAD 00		
+RAE 00		
+RAF 00		
+RB0 00		
+RB3 1E		
+RB4 1E		
+RB5 0C		
+RB6 1E		
+RB7 01		
+RB8 1E		
+RB9 00		
+RBA 1E		
+RBB 34		
+RBC 1E		
+RBD F5		
+RBE 1E		
+RBF 16		
+RC0 1E		
+RC1 1E		
+RC2 1E		
+RC3 00		
+RC4 00		
+		
+// ===  source/mux sequence ===		
+RFE 40		
+R4C 22		
+R53 A0		
+		
+		
+// ===  SD/SW_Toggle_Sequence_Control ===  		
+RFE F0
+R72 36
+R73 63
+R74 14
+R75 41
+R76 25
+R77 52
+R78 36
+R79 63
+R7A 14
+R7B 41
+R7C 25
+R7D 52
+R7E 14
+R7F 41
+R80 36
+R81 63
+R82 25
+R83 52
+R84 14
+R85 41
+R86 36
+R87 63
+R88 25
+R89 52
+		
+		
+// === GIP Setting  ===			
+RFE 70
+R00 C0
+R01 08
+R02 04
+R03 01
+R04 00
+R05 03
+R06 30
+R07 30
+
+R09 C0
+R0A 08
+R0B 04
+R0C 01
+R0D 00
+R0E 01
+R0F 30
+R10 30
+
+R12 C0
+R13 00
+R14 02
+R15 01
+R16 08
+R17 01
+R18 27
+R19 00
+
+R1B C0
+R1C 00
+R1D 02
+R1E 01
+R1F 08
+R20 00
+R21 27
+R22 00				
+		
+RFE 70
+R4C 80
+R4D 00
+R4E 01
+R4F 00
+R50 01
+R51 F7
+R52 30			
+		
+RFE 70
+R53 C6
+R54 00
+R55 03
+R56 01
+R58 00
+R65 A8
+R66 08
+R67 30		
+		
+// === MUX Sequence Control ===		
+RFE F0		
+RA3 00		
+RFE 70		
+R76 0C		
+R77 00		
+R78 05		
+R68 0C		
+R69 0C		
+R6A 0C		
+R6B 0C		
+R6C 0C		
+R6D 0C		
+RFE F0		
+RA9 1F		
+RAA 1F		
+RAB 1F		
+RAC 1F		
+RAD 1F		
+RAE 1F		
+RFE 70		
+R93 0C		
+R94 00		
+R96 05		
+RDB 0C		
+RDC 0C		
+RDD 0C		
+RDE 0C		
+RDF 0C		
+RE0 0C		
+RE7 1F		
+RE8 1F		
+RE9 1F		
+REA 1F		
+REB 1F		
+REC 1F		
+		
+// ===  Power on/off sequence Blank period control  ===  		
+RFE 70		
+RD1 F0		
+RD2 FF		
+RD3 F0		
+RD4 FF		
+RD5 A0		
+RD6 AA		
+RD7 F0		
+RD8 FF		
+RFE F0		
+RA4 F0		
+RA5 FF		
+RA6 F0		
+RA7 FF		
+RFE 19		
+R57 F0		
+R58 FF		
+R59 F0		
+R5A FF		
+R5B F0		
+R5C FF		
+		
+// ===  Source  ===		
+RFE 40		
+R4D 2A		
+R4E 00		
+R4F 00		
+R50 00		
+R51 F3		
+R52 23		
+R6B F3		
+R6C 13		
+R8F FF		
+R90 FF		
+R91 FF		
+RA2 10		
+R07 21		
+R35 81		
+		
+// === gamma setting  ===		
+RFE 80
+R94 00
+
+RFE 1B
+R00 00 //1 band gamma
+R01 00
+
+R02 00 //AOD gamma1??20??gamma3
+R05 00 	// NOR gamma1 
+RFE 40
+R33 10		
+R34 C1		
+		
+RFE 50		
+RA9 18		
+RAA 8D		
+RAB 01		
+		
+RFE 60		
+RA9 18		
+RAA 8D		
+RAB 01		
+		
+RFE 30		
+RA9 18		
+RAA 8D		
+RAB 01		
+		
+//=== Watchedge ===		
+RFE 90
+R17 01      
+R18 01
+R19 00
+R1A 00
+R1B 40
+R1C 88
+R1D D0
+R1E 11
+R1F 0D
+R20 00
+R21 18
+R22 18
+R23 00
+R24 D1
+R25 85
+R26 00
+R27 FF
+R28 D3
+	 
+R29 01
+R2A 88
+R2B 00
+R2D 40
+R2F 88
+R30 D0
+R31 FF
+R32 0D
+R33 00
+R34 18
+R35 18
+R36 00
+R37 D1
+R38 85
+R39 00
+R3A FF
+R3B C3
+	 
+RA4 01
+RA5 00
+RA6 D0
+RA7 44
+RA9 88
+RAA D0
+RAB 11
+RAC 93
+RAD 0C
+RAE 18
+RAF 18
+RB0 00
+RB1 D1
+RB2 85
+RB3 00
+RB4 FF
+RB5 E3
+	 
+RFE 11
+R00 01
+R01 88
+R02 D0
+R03 44
+R04 88
+R05 D0
+R06 FF
+R07 93
+R08 0C
+R09 18
+R0A 18
+R0B 00
+R0C D1
+R0D 85
+R0E 00
+R0F FF
+R10 F3		
+		
+//=== SCC ===		
+RFE 90		
+R4E 07		
+R4F 07		
+R50 0C		
+R49 01		
+R4A A0		
+RC7 0D		
+RC8 70		
+R51 00
+R52 88
+R53 00
+R54 10
+R55 00
+R56 00
+R57 00
+R58 00
+R59 00
+R5A 08
+R5B 10
+R5C 00
+R5D 08
+R5E 80
+R5F 00
+R60 00
+R61 08
+R62 10
+R63 00
+R64 00
+R65 00
+R66 00
+R67 00
+R68 48
+R69 00
+R6A 00
+R6B 08
+R6C 00
+R6D 40
+R6E 00
+R6F 10
+R70 84
+R71 00
+R72 00
+R73 00
+R74 08
+R75 04
+R76 10
+R77 04
+R78 00
+R79 00
+R7A 00
+R7B 00
+R7C 44
+R7D 10
+R7E 00
+R7F 08
+R80 00
+R81 08
+R82 00
+R83 44
+R84 04
+R85 00
+R86 00
+R87 00
+R88 08
+R89 00
+R8A 10
+R8B 08
+R8C 00
+R8D 00
+R8E 00
+R8F 00
+R90 00
+R91 10
+R92 08
+R93 08
+R94 80
+R95 00
+R96 00
+R97 80
+R98 10
+R99 00
+R9A 00
+R9B 00
+R9C 00
+R9D 00
+R9E 40
+R9F 08
+RA0 00
+RA2 08		
+		
+// === IC Setting ===		
+RFE 19		
+R49 03		
+R4B 45		
+R4C 05		
+R4D 45		
+R4E 05		
+R4F 45		
+R50 05		
+RFE 70		
+R97 77		
+R98 77		
+RC9 05		
+RCA 05		
+RCB 05		
+RCC 05		
+RCD 05		
+RCE 85		
+RCF 05		
+RD0 45		
+		
+RFE E0		
+R19 44		
+R1E 44		
+R1C 41		
+R18 00		
+R1B 34		
+R1A 1A		
+R1D 52		
+R71 3F//7F
+R72 40	  
+R28 58		
+R05 04		
+R0D 04		
+		
+RFE 40		
+R54 AC		
+R55 A0		
+R48 AA		
+		
+RFE 20
+R34 33
+R37 03      
+R39 33	
+
+RFE 20   
+R43 8B
+R60 11 
+R64 11 
+R6C 11
+R6D 25 
+R6A 15
+
+RFE 40
+R25 22 
+R21 AA
+R1C AC
+
+//RFE D0
+//R23 28
+  
+RFE E0
+R75 11
+//Power on&off
+RFE E0
+R4D 10
+R58 10
+R56 22
+R4E 19
+R59 19
+R6D 01
+R6F 01
+
+RFE 20
+R1D 80
+RFE 40
+R37 25
+
+//OTP
+RFE E0
+R13 2a
+R14 00
+R15 09
+R7A 15	
+		
+//=== CMD1 setting ===		
+RFE 00		
+RC4 80 //SPI setting, mipi remove
+//R3A 55 //55 RGB565, 77 RGB888		
+R35 00		
+R53 20		
+R51 FF		
+R63 FF		
+R2A 00 06 01 0B		
+R2B 00 00 03 9F		
+R11		
+delay 60		
+R29		
